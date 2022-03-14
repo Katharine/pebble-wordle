@@ -1,0 +1,5 @@
+.lock-waf*
+shell.nix
+build/
+.DS_Store
+

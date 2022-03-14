@@ -1,0 +1,39 @@
+{
+  "name": "pebble-wordle",
+  "author": "Katharine Berry",
+  "version": "0.1.0",
+  "keywords": [
+    "pebble-app"
+  ],
+  "private": true,
+  "dependencies": {},
+  "pebble": {
+    "displayName": "pebble-wordle",
+    "uuid": "f63e63cf-445b-48f6-8922-2d785981443d",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "basalt"
+    ],
+    "watchapp": {
+      "watchface": false
+    },
+    "messageKeys": [
+      "dummy"
+    ],
+    "resources": {
+      "media": [
+        {
+          "type": "raw",
+          "name": "ACCEPTABLE_WORDS",
+          "file": "acceptable.dat"
+        },
+        {
+          "type": "raw",
+          "name": "SOLUTION_WORDS",
+          "file": "solutions.dat"
+        }
+      ]
+    }
+  }
+}
