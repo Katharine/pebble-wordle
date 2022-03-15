@@ -5,13 +5,14 @@
 #include "title_layer.h"
 #include "game.h"
 #include "stat_window.h"
+#include "help_window.h"
 
-#define MENU_OPTIONS 2
+#define MENU_OPTIONS 3
 
 static Window *s_window;
 static TitleLayer *s_title;
 static TextLayer *s_number;
-static char *s_menu_text[MENU_OPTIONS] = {"Play", "Stats"};
+static char *s_menu_text[MENU_OPTIONS] = {"Play", "Stats", "Help"};
 static TextLayer *s_menu_options[MENU_OPTIONS];
 static char s_number_text[15];
 static int s_selected_option = 0;
@@ -45,7 +46,7 @@ static void prv_window_load(Window *window) {
 
 static void prv_construct_menu() {
   for (int i = 0; i < MENU_OPTIONS; ++i) {
-    s_menu_options[i] = text_layer_create(GRect(0, 50 + 40 * i, 144, 35));
+    s_menu_options[i] = text_layer_create(GRect(0, 40 + 35 * i, 144, 35));
     text_layer_set_text_alignment(s_menu_options[i], GTextAlignmentCenter);
     text_layer_set_text(s_menu_options[i], s_menu_text[i]);
     layer_add_child(window_get_root_layer(s_window), (Layer *)s_menu_options[i]);
@@ -109,15 +110,17 @@ static void prv_handle_select(ClickRecognizerRef recognizer, void *ctx) {
     case 1:
       stat_window_push();
       break;
+    case 2:
+      help_window_push();
   }
 }
 
 static void prv_handle_up(ClickRecognizerRef recognizer, void *ctx) {
-  prv_handle_scroll(1);
+  prv_handle_scroll(-1);
 }
 
 static void prv_handle_down(ClickRecognizerRef recognizer, void *ctx) {
-  prv_handle_scroll(-1);
+  prv_handle_scroll(1);
 }
 
 static void prv_handle_scroll(int direction) {

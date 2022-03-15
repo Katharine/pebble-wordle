@@ -260,6 +260,7 @@ static void prv_record_result() {
 	APP_LOG(APP_LOG_LEVEL_INFO, "recording result");
 	StatTracker *tracker = stat_tracker_load();
 	int result = 0;
+
 	if (s_game_state.status == GameStatusWon) {
 		result = s_game_state.guess_number + 1;
 	}
@@ -287,7 +288,8 @@ static void prv_handle_back(ClickRecognizerRef recognizer, void *ctx) {
 	}
 	GameState *s = &s_game_state;
 	if (s->status != GameStatusPlaying) {
-		window_stack_pop(s_window);
+		window_stack_pop(true);
+		return;
 	}
 	if (s_notify_layer != NULL) {
 		prv_notify(NULL);
@@ -297,7 +299,7 @@ static void prv_handle_back(ClickRecognizerRef recognizer, void *ctx) {
 		--s->current_char;
 		word_layer_set_cursor(s_guess_layers[s->guess_number], s->current_char);
 	} else {
-		window_stack_pop(s_window);
+		window_stack_pop(true);
 	}
 }
 
