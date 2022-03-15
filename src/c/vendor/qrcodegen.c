@@ -33,13 +33,12 @@
 	#define testable  // Expose private functions
 #endif
 
-char *strchr(const char *str, int ch)
-{
-for (;; str++) {
-        if (*str == ch) return (char *)str;
-        if (!*str) return NULL;
-        }
-return NULL;
+char *strchr(const char *str, int ch) {
+	for (;; str++) {
+		if (*str == ch) return (char *)str;
+		if (!*str) return NULL;
+	}
+	return NULL;
 }
 
 
