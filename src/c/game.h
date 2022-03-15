@@ -11,6 +11,7 @@ enum GameStatus {
 };
 typedef enum GameStatus GameStatus;
 
+void game_restore();
 void show_game();
 int game_get_number();
 GameStatus game_get_status();

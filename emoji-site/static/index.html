@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width">
+		<meta name="viewport" content="initial-scale=1.0">
+		<title>Copy your score</title>
+		<style>
+			body {
+				text-align: center;
+				font-family: sans-serif;
+				font-size: 25px;
+			}
+
+			#wordle-holder {
+				margin-top: 50px;
+				text-align: left;
+				line-height: 26px;
+				letter-spacing: 1px;
+				border: 1px solid black;
+				border-radius: 3px;
+				width: 200px;
+				padding: 20px;
+				margin-left: auto;
+				margin-right: auto;
+			}
+
+			.wordle-header {
+				letter-spacing: 0;
+			}
+
+			#copy-button {
+				font-size: 30px;
+				background-color: lightgreen;
+				border: 1px solid green;
+				border-radius: 3px;
+				margin-top: 20px;
+				color: black;
+				padding-top: 10px;
+				padding-bottom: 10px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="wordle-holder" style="white-space: pre-wrap;"></div>
+		<button id="copy-button">Copy</button>
+		<p id="copy-result" style="display: none;">Copied!</p>
+
+		<script type="text/javascript">
+			let ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+			let EMOJI_MAP = ['🤔', '⬛️', '🟨', '🟩'];
+			let content = location.pathname.substring(1);
+
+			function copyToClipboard(string) {
+			  let textarea;
+			  let result;
+
+			  try {
+			    textarea = document.createElement('textarea');
+			    textarea.setAttribute('readonly', true);
+			    textarea.setAttribute('contenteditable', true);
+			    textarea.style.position = 'fixed'; // prevent scroll from jumping to the bottom when focus is set.
+			    textarea.value = string;
+
+			    document.body.appendChild(textarea);
+
+			    textarea.focus();
+			    textarea.select();
+
+			    const range = document.createRange();
+			    range.selectNodeContents(textarea);
+
+			    const sel = window.getSelection();
+			    sel.removeAllRanges();
+			    sel.addRange(range);
+
+			    textarea.setSelectionRange(0, textarea.value.length);
+			    result = document.execCommand('copy');
+			  } catch (err) {
+			    console.error(err);
+			    result = null;
+			  } finally {
+			    document.body.removeChild(textarea);
+			  }
+			  return true;
+			}
+
+			function decodeWordleNumber(encoded) {
+				return ALPHABET.indexOf(encoded[0]) * 36 * 36 + ALPHABET.indexOf(encoded[1]) * 36 + ALPHABET.indexOf(encoded[2]);
+			}
+
+			function decodeWordleGuess(encoded) {
+				let number = ALPHABET.indexOf(encoded[0]) * 36 + ALPHABET.indexOf(encoded[1]);
+				let result = [];
+				for (var i = 0; i < 5; ++i) {
+					result.push(EMOJI_MAP[(number >> (i*2)) & 3]);
+				}
+				return result.join('');
+			}
+
+			function decodeString(s) {
+				let guesses = [];
+				for (var i = 3; i < s.length; i += 2) {
+					guesses.push(decodeWordleGuess(s.substring(i, i+2)));
+				}
+				return {
+					number: decodeWordleNumber(s.substring(0, 3)),
+					guesses: guesses
+				}
+			}
+
+			if (content.length > 3) {
+				var holder = document.getElementById('wordle-holder');
+				var result = decodeString(content);
+				var guessCount = result.guesses.length;
+				if (result.guesses[result.guesses.length-1] != '🟩🟩🟩🟩🟩') {
+					guessCount = 'X';
+				}
+
+				let text = `Wordle ${result.number} ${guessCount}/6\n\n${result.guesses.join("\n")}`;
+				holder.innerHTML = `<span class="wordle-header">Wordle ${result.number} ${guessCount}/6</span>\n\n${result.guesses.join("\n")}`;
+				document.getElementById('copy-button').onclick = function() {
+					if (copyToClipboard(text)) {
+						document.getElementById('copy-result').style.display = 'block';
+					}
+				}
+			}
+
+		</script>
+	</body>
+</html>

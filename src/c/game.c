@@ -41,6 +41,10 @@ static void prv_save_state();
 static void prv_restore_state();
 static void prv_record_result();
 
+void game_restore() {
+	prv_restore_state();
+}
+
 void show_game() {
 	prv_init();
 }

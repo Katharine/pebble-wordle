@@ -4,7 +4,7 @@
 #include "model.h"
 #include "vendor/qrcodegen.h"
 
-#define URL_FORMAT "HTTPS://WORDLE.KTBY.IO/"
+#define URL_FORMAT "HTTPS://WORD.KTBY.IO/"
 
 typedef struct {
 	bool has_qr_code;
@@ -94,14 +94,17 @@ static void prv_update_proc(Layer *layer, GContext *ctx) {
 		graphics_fill_rect(ctx, layer_get_bounds(layer), 0, GCornerNone);
 		return;
 	}
+
 	int modules_per_side = qrcodegen_getSize(data->qrcode);
 	GRect bounds = layer_get_bounds(layer);
-	int ppm = (bounds.size.w > bounds.size.h ? bounds.size.w : bounds.size.h) / modules_per_side;
+	int ppm = (bounds.size.w < bounds.size.h ? bounds.size.w : bounds.size.h) / modules_per_side;
+	int offset_x = (bounds.size.w - ppm * modules_per_side) / 2;
+	int offset_y = (bounds.size.h - ppm * modules_per_side) / 2;
 	for (int i = 0; i < modules_per_side; ++i) {
 		for (int j = 0; j < modules_per_side; ++j) {
 			GColor color = qrcodegen_getModule(data->qrcode, i, j) ? GColorBlack : GColorWhite;
 			graphics_context_set_fill_color(ctx, color);
-			graphics_fill_rect(ctx, GRect(i * ppm, j * ppm, ppm, ppm), 0, GCornerNone);
+			graphics_fill_rect(ctx, GRect(offset_x + i * ppm, offset_y + j * ppm, ppm, ppm), 0, GCornerNone);
 		}
 	}
 }
