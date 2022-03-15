@@ -58,17 +58,6 @@ void word_of_the_day(char word[WORD_LENGTH]) {
 	prv_word_for_day(wordle_number(), word);
 }
 
-static void log_tm(struct tm *t) {
-	APP_LOG(APP_LOG_LEVEL_INFO, "tm_sec: %d", t->tm_sec);
-	APP_LOG(APP_LOG_LEVEL_INFO, "tm_min: %d", t->tm_min);
-	APP_LOG(APP_LOG_LEVEL_INFO, "tm_hour: %d", t->tm_hour);
-	APP_LOG(APP_LOG_LEVEL_INFO, "tm_mday: %d", t->tm_mday);
-	APP_LOG(APP_LOG_LEVEL_INFO, "tm_year: %d", t->tm_year);
-	APP_LOG(APP_LOG_LEVEL_INFO, "tm_wday: %d", t->tm_wday);
-	APP_LOG(APP_LOG_LEVEL_INFO, "tm_yday: %d", t->tm_yday);
-	APP_LOG(APP_LOG_LEVEL_INFO, "tm_isdst: %d", t->tm_isdst);
-}
-
 static int prv_compare_tm(struct tm *a, struct tm *b) {
 	if (a->tm_year > b->tm_year) {
 		return 1;

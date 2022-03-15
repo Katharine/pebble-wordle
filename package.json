@@ -6,7 +6,9 @@
     "pebble-app"
   ],
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "pebble-events": "^1.2.0"
+  },
   "pebble": {
     "displayName": "pebble-wordle",
     "uuid": "f63e63cf-445b-48f6-8922-2d785981443d",

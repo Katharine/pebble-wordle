@@ -1,4 +1,6 @@
 #include <pebble.h>
+#include <pebble-events/pebble-events.h>
+
 #include "model.h"
 #include "title_layer.h"
 #include "game.h"
@@ -13,6 +15,8 @@ static char *s_menu_text[MENU_OPTIONS] = {"Play", "Stats"};
 static TextLayer *s_menu_options[MENU_OPTIONS];
 static char s_number_text[15];
 static int s_selected_option = 0;
+static int s_wordle_number;
+static EventHandle s_tick_timer_handle;
 
 static void prv_click_config_provider(void *ctx);
 static void prv_construct_menu();
@@ -23,6 +27,8 @@ static void prv_handle_down(ClickRecognizerRef recognizer, void *ctx);
 static void prv_handle_scroll(int direction);
 static void prv_window_load(Window *window);
 static void prv_window_unload(Window *window);
+static void prv_deinit();
+static void prv_handle_day_change(struct tm *tick_time, TimeUnits units_changed);
 
 
 static void prv_window_load(Window *window) {
@@ -30,7 +36,8 @@ static void prv_window_load(Window *window) {
   layer_add_child(window_get_root_layer(window), s_title);
   s_number = text_layer_create(GRect(0, 151, 140, 16));
   text_layer_set_text_alignment(s_number, GTextAlignmentRight);
-  snprintf(s_number_text, 15, "Wordle #%d", wordle_number());
+  s_wordle_number = wordle_number();
+  snprintf(s_number_text, 15, "Wordle #%d", s_wordle_number);
   text_layer_set_text(s_number, s_number_text);
   layer_add_child(window_get_root_layer(window), (Layer *)s_number);
   prv_construct_menu();
@@ -73,6 +80,19 @@ static void prv_init() {
   });
   window_set_click_config_provider(s_window, prv_click_config_provider);
   window_stack_push(s_window, true);
+  s_tick_timer_handle = events_tick_timer_service_subscribe(DAY_UNIT, prv_handle_day_change);
+}
+
+static void prv_deinit() {
+  events_tick_timer_service_unsubscribe(s_tick_timer_handle);
+}
+
+static void prv_handle_day_change(struct tm *tick_time, TimeUnits units_changed) {
+  if (units_changed & DAY_UNIT) {
+    if (s_wordle_number != wordle_number()) {
+      window_stack_pop_all(true);
+    }
+  }
 }
 
 static void prv_click_config_provider(void *ctx) {
@@ -113,4 +133,5 @@ static void prv_handle_scroll(int direction) {
 int main(void) {
   prv_init();
   app_event_loop();
+  prv_deinit();
 }
