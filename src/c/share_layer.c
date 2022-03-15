@@ -4,7 +4,9 @@
 #include "model.h"
 #include "vendor/qrcodegen.h"
 
-#define URL_FORMAT "HTTPS://WORD.KTBY.IO/"
+// This needs to be in ALL CAPS so we can use the more efficient
+// QR encoding.
+#define URL_PREFIX "HTTPS://WORD.KTBY.IO/"
 
 typedef struct {
 	bool has_qr_code;
@@ -27,7 +29,6 @@ void share_layer_set_game_state(ShareLayer *layer, int wordle_num, LetterStatus 
 	char path[14];
 	memset(path, 0, sizeof(path));
 	prv_silly_number_encoding(wordle_num, path);
-		APP_LOG(APP_LOG_LEVEL_DEBUG, "encoding: %c%c%c", path[0], path[1], path[2]);
 	for (int i = 0; i < GUESS_LIMIT; ++i) {
 		if (guesses[i][0] == LetterStatusNeutral) {
 			break;
@@ -37,21 +38,12 @@ void share_layer_set_game_state(ShareLayer *layer, int wordle_num, LetterStatus 
 			guess |= ((uint8_t)guesses[i][j] << (j * 2));
 		}
 		prv_silly_short_encoding(guess, path + 3 + i*2);
-		APP_LOG(APP_LOG_LEVEL_DEBUG, "encoding: %c%c", path[3+i*2], path[4+i*2]);
 	}
-	size_t url_length = sizeof(URL_FORMAT) + strlen(path);
+	size_t url_length = sizeof(URL_PREFIX) + strlen(path);
 	char* url = malloc(url_length);
-	snprintf(url, url_length, URL_FORMAT "%s", path);
-	APP_LOG(APP_LOG_LEVEL_DEBUG, "Encoded URL: %s", url);
-
+	snprintf(url, url_length, URL_PREFIX "%s", path);
 
 	data->has_qr_code = prv_generate_alphanumeric_qr(url, data->qrcode);
-
-	APP_LOG(APP_LOG_LEVEL_DEBUG, "Generated QR code");
-	if (!data->has_qr_code) {
-		goto end;
-	}
-end:
 	free(url);
 }
 

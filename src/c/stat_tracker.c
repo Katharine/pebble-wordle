@@ -1,5 +1,6 @@
 #include <pebble.h>
 #include "stat_tracker.h"
+#include "model.h"
 
 #define STAT_TRACKER_VERSION_KEY 3
 #define STAT_TRACKER_CONTENT_KEY 4
@@ -26,25 +27,26 @@ void stat_tracker_destroy(StatTracker *stat_tracker) {
 }
 
 void stat_tracker_record_result(StatTracker *stat_tracker, int wordle_num, int result) {
-	if (stat_tracker->last_wordle == wordle_num) {
-		return;
-	}
-	if (stat_tracker->last_wordle >= wordle_num - 1) {
-		stat_tracker->current_streak++;
+	if (result > 0) {
+		if (stat_tracker->last_wordle >= wordle_num - 1) {
+			stat_tracker->current_streak++;
+		} else {
+			stat_tracker->current_streak = 1;
+		}
+		if (stat_tracker->current_streak > stat_tracker->max_streak) {
+			stat_tracker->max_streak = stat_tracker->current_streak;
+		}
+		stat_tracker->last_wordle = wordle_num;
 	} else {
-		stat_tracker->current_streak = 1;
+		stat_tracker->current_streak = 0;
 	}
-	if (stat_tracker->current_streak > stat_tracker->max_streak) {
-		stat_tracker->max_streak = stat_tracker->current_streak;
-	}
-	stat_tracker->last_wordle = wordle_num;
 	stat_tracker->distribution[result]++;
 	persist_write_int(STAT_TRACKER_VERSION_KEY, 1);
 	persist_write_data(STAT_TRACKER_CONTENT_KEY, stat_tracker, sizeof(StatTracker));
 }
 
 int stat_tracker_get_current_streak(StatTracker *tracker) {
-	return tracker->current_streak;
+	return tracker->last_wordle >= wordle_number() - 1 ? tracker->current_streak : 0;
 }
 
 int stat_tracker_get_max_streak(StatTracker *tracker) {

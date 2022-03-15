@@ -58,14 +58,86 @@ void word_of_the_day(char word[WORD_LENGTH]) {
 	prv_word_for_day(wordle_number(), word);
 }
 
+static void log_tm(struct tm *t) {
+	APP_LOG(APP_LOG_LEVEL_INFO, "tm_sec: %d", t->tm_sec);
+	APP_LOG(APP_LOG_LEVEL_INFO, "tm_min: %d", t->tm_min);
+	APP_LOG(APP_LOG_LEVEL_INFO, "tm_hour: %d", t->tm_hour);
+	APP_LOG(APP_LOG_LEVEL_INFO, "tm_mday: %d", t->tm_mday);
+	APP_LOG(APP_LOG_LEVEL_INFO, "tm_year: %d", t->tm_year);
+	APP_LOG(APP_LOG_LEVEL_INFO, "tm_wday: %d", t->tm_wday);
+	APP_LOG(APP_LOG_LEVEL_INFO, "tm_yday: %d", t->tm_yday);
+	APP_LOG(APP_LOG_LEVEL_INFO, "tm_isdst: %d", t->tm_isdst);
+}
+
+static int prv_compare_tm(struct tm *a, struct tm *b) {
+	if (a->tm_year > b->tm_year) {
+		return 1;
+	} else if (a->tm_year < b->tm_year) {
+		return -1;
+	}
+	if (a->tm_mon > b->tm_mon) {
+		return 1;
+	} else if(a->tm_mon < b->tm_mon) {
+		return -1;
+	}
+	if (a->tm_mday > b->tm_mday) {
+		return 1;
+	} else if(a->tm_mday < b->tm_mday) {
+		return -1;
+	}
+	if (a->tm_hour > b->tm_hour) {
+		return 1;
+	} else if (a->tm_hour < b->tm_hour) {
+		return -1;
+	}
+	if (a->tm_min > b->tm_min) {
+		return 1;
+	} else if(a->tm_min < b->tm_min) {
+		return -1;
+	}
+	return 0;
+}
+
+static time_t prv_tm_diff(struct tm *a, struct tm *b) {
+	int compare = prv_compare_tm(a, b);
+	if (compare == 0) {
+		return 0;
+	}
+	if (compare < 0) {
+		struct tm *temp = a;
+		a = b;
+		b = temp;
+	}
+	int difference = (a->tm_hour - b->tm_hour) * 3600 + (a->tm_min - b->tm_min) * 60;
+	if(a->tm_mday != b->tm_mday) {
+		difference += 86400;
+	}
+	if (compare > 0) {
+		return difference;
+	}
+	return -difference;
+}
+
+static time_t prv_timezone_offset() {
+	time_t now = time(NULL);
+	struct tm local = *localtime(&now);
+	struct tm utc = *gmtime(&now);
+	return prv_tm_diff(&local, &utc);
+}
+
 int wordle_number() {
 	// Wordle day 0 is June 19th, 2021 in the user's local time
 	struct tm wordle_epoch = (struct tm) {.tm_mday = 19, .tm_mon = 5, .tm_year = 121, .tm_isdst = -1};
-	time_t now = time(NULL) - 86400*2;
 	time_t epoch_unixtime = mktime(&wordle_epoch);
 
+	time_t now = time(NULL);
+	APP_LOG(APP_LOG_LEVEL_INFO, "now: %d", now);
+	time_t tz_offset = prv_timezone_offset();
+	APP_LOG(APP_LOG_LEVEL_INFO, "tz_offset: %d", tz_offset);
+	now += tz_offset;
+	APP_LOG(APP_LOG_LEVEL_INFO, "local now: %d", now);
 	int days = (int)(now - epoch_unixtime) / 86400;
-	APP_LOG(APP_LOG_LEVEL_INFO, "wordle %d", days);
+	APP_LOG(APP_LOG_LEVEL_INFO, "wordle: %d", days);
 	return days;
 }
 

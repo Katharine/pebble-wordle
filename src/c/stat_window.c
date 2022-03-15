@@ -2,6 +2,7 @@
 #include "stat_window.h"
 #include "stat_tracker.h"
 #include "share_layer.h"
+#include "distribution_layer.h"
 #include "game.h"
 
 static Window *s_window;
@@ -22,6 +23,9 @@ static TextLayer *s_win_percent_number;
 static char s_win_percent_text[4];
 static ShareLayer *s_share_layer;
 static TextLayer *s_share_label;
+static DistributionLayer *s_distribution_layer;
+static TextLayer *s_distribution_label;
+static StatTracker *s_tracker;
 
 static void prv_window_load(Window *window);
 static void prv_window_unload(Window *window);
@@ -67,7 +71,7 @@ static void prv_window_load(Window *window) {
 
 	s_content_indicator = scroll_layer_get_content_indicator(s_scroll_layer);
 	s_up_arrow = layer_create(GRect(0, 0, 144, 15));
-	s_down_arrow = layer_create(GRect(0, 148, 144, 15));
+	s_down_arrow = layer_create(GRect(0, 153, 144, 15));
 	layer_add_child(window_get_root_layer(window), s_up_arrow);
 	layer_add_child(window_get_root_layer(window), s_down_arrow); 
 
@@ -93,7 +97,9 @@ static void prv_window_load(Window *window) {
 	};
 	content_indicator_configure_direction(s_content_indicator, ContentIndicatorDirectionDown, &down_config);
 
-	scroll_layer_set_content_size(s_scroll_layer, GSize(144, 168*2));
+	bool has_completed_game = (game_get_status() == GameStatusWon || game_get_status() == GameStatusLost);
+
+	scroll_layer_set_content_size(s_scroll_layer, GSize(144, 168 * (has_completed_game ? 3 : 2)));
 
 	s_played_number = prv_create_value(s_scroll_layer, GRect(0, 5, 72, 44));
 	s_played_label = prv_create_label(s_scroll_layer, GRect(0, 39, 72, 25), "Played");
@@ -104,20 +110,24 @@ static void prv_window_load(Window *window) {
 	s_max_streak_number = prv_create_value(s_scroll_layer, GRect(72, 69, 72, 44));
 	s_max_streak_label = prv_create_label(s_scroll_layer, GRect(72, 103, 72, 55), "Max\nStreak");
 
-	StatTracker *tracker = stat_tracker_load();
+	s_tracker = stat_tracker_load();
 
-	snprintf(s_played_text, sizeof(s_played_text), "%d", stat_tracker_get_total_played(tracker));
+	snprintf(s_played_text, sizeof(s_played_text), "%d", stat_tracker_get_total_played(s_tracker));
 	text_layer_set_text(s_played_number, s_played_text);
-	snprintf(s_win_percent_text, sizeof(s_win_percent_text), "%d", stat_tracker_get_win_percent(tracker));
+	snprintf(s_win_percent_text, sizeof(s_win_percent_text), "%d", stat_tracker_get_win_percent(s_tracker));
 	text_layer_set_text(s_win_percent_number, s_win_percent_text);
-	snprintf(s_current_streak_text, sizeof(s_current_streak_text), "%d", stat_tracker_get_current_streak(tracker));
+	snprintf(s_current_streak_text, sizeof(s_current_streak_text), "%d", stat_tracker_get_current_streak(s_tracker));
 	text_layer_set_text(s_current_streak_number, s_current_streak_text);
-	snprintf(s_max_streak_text, sizeof(s_max_streak_text), "%d", stat_tracker_get_max_streak(tracker));
+	snprintf(s_max_streak_text, sizeof(s_max_streak_text), "%d", stat_tracker_get_max_streak(s_tracker));
 	text_layer_set_text(s_max_streak_number, s_max_streak_text);
 
-	if (game_get_status() == GameStatusWon || game_get_status() == GameStatusLost) {
-		s_share_layer = share_layer_create(GRect(0, 185, 144, 125));
-		s_share_label = prv_create_label(s_scroll_layer, GRect(0, 310, 144, 25), "Scan to share score");
+	s_distribution_layer = distribution_layer_create(GRect(5, 200, 134, 125), s_tracker);
+	scroll_layer_add_child(s_scroll_layer, s_distribution_layer);
+	s_distribution_label = prv_create_label(s_scroll_layer, GRect(0, 177, 144, 25), "Distribution");
+
+	if (has_completed_game) {
+		s_share_layer = share_layer_create(GRect(0, 354, 144, 125));
+		s_share_label = prv_create_label(s_scroll_layer, GRect(0, 479, 144, 25), "Scan to share score");
 		LetterStatus statuses[GUESS_LIMIT][WORD_LENGTH];
 		memset(statuses, 0, sizeof(statuses));
 		game_get_guesses(statuses);
@@ -135,10 +145,15 @@ static void prv_window_unload(Window *window) {
 	text_layer_destroy(s_current_streak_label);
 	text_layer_destroy(s_max_streak_label);
 	text_layer_destroy(s_max_streak_number);
-	layer_destroy(s_up_arrow);
-	layer_destroy(s_down_arrow);
-	scroll_layer_destroy(s_scroll_layer);
+	distribution_layer_destroy(s_distribution_layer);
+	text_layer_destroy(s_distribution_label);
 	if (s_share_layer != NULL) {
 		share_layer_destroy(s_share_layer);
+		text_layer_destroy(s_share_label);
+		s_share_layer = NULL;
 	}
+	layer_destroy(s_up_arrow);
+	layer_destroy(s_down_arrow);
+	stat_tracker_destroy(s_tracker);
+	scroll_layer_destroy(s_scroll_layer);
 }

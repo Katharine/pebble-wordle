@@ -22,6 +22,7 @@ static WordLayer *s_guess_layers[GUESS_LIMIT];
 static NotifyLayer *s_notify_layer;
 static GameState s_game_state;
 static bool s_animation_lock;
+static bool s_loaded;
 static char s_word[WORD_LENGTH];
 
 
@@ -51,6 +52,10 @@ void show_game() {
 
 int game_get_number() {
 	return s_game_state.word_number;
+}
+
+int game_get_guess_number() {
+	return s_game_state.guess_number;
 }
 
 GameStatus game_get_status() {
@@ -114,21 +119,33 @@ static void prv_window_unload(Window *window) {
 }
 
 static void prv_save_state() {
+	APP_LOG(APP_LOG_LEVEL_INFO, "prv_save_state()");
 	persist_write_int(1, 1);
 	persist_write_data(2, &s_game_state, sizeof(GameState));
 }
 
 static void prv_restore_state() {
+	APP_LOG(APP_LOG_LEVEL_INFO, "prv_restore_state()");
+	if (s_loaded) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "already loaded state, bailing");
+		return;
+	}
 	GameState *s = &s_game_state;
 	word_of_the_day(s_word);
 	int word_number = wordle_number();
 	if (persist_read_int(1) == 1) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "usable state shuold be present, loading...");
 		persist_read_data(2, s, sizeof(GameState));
-		if (s->word_number != word_number) {
-			memset(s, 0, sizeof(GameState));
-			s->word_number = word_number;
+		if (s->word_number == word_number) {
+			APP_LOG(APP_LOG_LEVEL_INFO, "using loaded state");
+			s_loaded = true;
+			return;
 		}
 	}
+	APP_LOG(APP_LOG_LEVEL_INFO, "trashing loaded state");
+	memset(s, 0, sizeof(GameState));
+	s->word_number = word_number;
+	s_loaded = true;
 }
 
 static void prv_click_config_provider(void *ctx) {
@@ -240,12 +257,13 @@ static void prv_handle_select(ClickRecognizerRef recognizer, void *ctx) {
 }
 
 static void prv_record_result() {
+	APP_LOG(APP_LOG_LEVEL_INFO, "recording result");
 	StatTracker *tracker = stat_tracker_load();
 	int result = 0;
 	if (s_game_state.status == GameStatusWon) {
 		result = s_game_state.guess_number + 1;
 	}
-	stat_tracker_record_result(tracker, wordle_number(), result);
+	stat_tracker_record_result(tracker, s_game_state.word_number, result);
 	stat_tracker_destroy(tracker);
 }
 

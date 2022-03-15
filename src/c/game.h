@@ -16,5 +16,6 @@ void show_game();
 int game_get_number();
 GameStatus game_get_status();
 int game_get_guesses(LetterStatus guesses[GUESS_LIMIT][WORD_LENGTH]);
+int game_get_guess_number();
 
 #endif
