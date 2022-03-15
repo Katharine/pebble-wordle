@@ -6,15 +6,6 @@
 #include "stat_tracker.h"
 #include "stat_window.h"
 
-#define GUESS_LIMIT 6
-
-enum GameStatus {
-	GameStatusPlaying,
-	GameStatusWon,
-	GameStatusLost,
-};
-typedef enum GameStatus GameStatus;
-
 typedef struct {
 	int guess_number;
 	int current_char;
@@ -52,6 +43,22 @@ static void prv_record_result();
 
 void show_game() {
 	prv_init();
+}
+
+int game_get_number() {
+	return s_game_state.word_number;
+}
+
+GameStatus game_get_status() {
+	return s_game_state.status;
+}
+
+int game_get_guesses(LetterStatus guesses[GUESS_LIMIT][WORD_LENGTH]) {
+	GameState *s = &s_game_state;
+	for (int i = 0; i <= s->guess_number; ++i) {
+		score_word(s->guesses[i], s_word, guesses[i]);
+	}
+	return s->guess_number+1;
 }
 
 static void prv_init() {

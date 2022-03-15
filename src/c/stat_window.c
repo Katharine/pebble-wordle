@@ -1,6 +1,8 @@
 #include <pebble.h>
 #include "stat_window.h"
 #include "stat_tracker.h"
+#include "share_layer.h"
+#include "game.h"
 
 static Window *s_window;
 static ScrollLayer *s_scroll_layer;
@@ -16,6 +18,7 @@ static char s_max_streak_text[5];
 static TextLayer *s_win_percent_label;
 static TextLayer *s_win_percent_number;
 static char s_win_percent_text[4];
+static ShareLayer *s_share_layer;
 
 static void prv_window_load(Window *window);
 static void prv_window_unload(Window *window);
@@ -77,6 +80,15 @@ static void prv_window_load(Window *window) {
 	snprintf(s_max_streak_text, sizeof(s_max_streak_text), "%d", stat_tracker_get_max_streak(tracker));
 	text_layer_set_text(s_max_streak_number, s_max_streak_text);
 
+	if (game_get_status() == GameStatusWon || game_get_status() == GameStatusLost) {
+		s_share_layer = share_layer_create(GRect(0, 0, 144, 168));
+		LetterStatus statuses[GUESS_LIMIT][WORD_LENGTH];
+		memset(statuses, 0, sizeof(statuses));
+		game_get_guesses(statuses);
+		share_layer_set_game_state(s_share_layer, game_get_number(), statuses);
+		layer_add_child(window_get_root_layer(window), s_share_layer);
+	}
+
 	// text_layer_set_text(s_played_number, "80");
 	// text_layer_set_text(s_win_percent_number, "100");
 	// text_layer_set_text(s_current_streak_number, "23");
@@ -93,4 +105,7 @@ static void prv_window_unload(Window *window) {
 	text_layer_destroy(s_max_streak_label);
 	text_layer_destroy(s_max_streak_number);
 	scroll_layer_destroy(s_scroll_layer);
+	if (s_share_layer != NULL) {
+		share_layer_destroy(s_share_layer);
+	}
 }

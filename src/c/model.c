@@ -61,7 +61,7 @@ void word_of_the_day(char word[WORD_LENGTH]) {
 int wordle_number() {
 	// Wordle day 0 is June 19th, 2021 in the user's local time
 	struct tm wordle_epoch = (struct tm) {.tm_mday = 19, .tm_mon = 5, .tm_year = 121, .tm_isdst = -1};
-	time_t now = time(NULL);
+	time_t now = time(NULL) - 86400*2;
 	time_t epoch_unixtime = mktime(&wordle_epoch);
 
 	int days = (int)(now - epoch_unixtime) / 86400;
