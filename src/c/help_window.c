@@ -98,15 +98,15 @@ static void prv_window_load(Window *window) {
 
 	s_example2_label = text_layer_create(GRect(5, 825, 134, 80));
 	text_layer_set_font(s_example2_label, font);
-	text_layer_set_text(s_example2_label, "The letter W is in the word but in the wrong spot.");
+	text_layer_set_text(s_example2_label, "The letter I is in the word but in the wrong spot.");
 	scroll_layer_add_child(s_scroll_layer, (Layer *)s_example2_label);
 
 	s_example3_word = word_layer_create(GPoint(7, 915));
 	word_layer_set_letter(s_example3_word, 0, 'v', LetterStatusNeutral, true);
 	word_layer_set_letter(s_example3_word, 1, 'a', LetterStatusNeutral, true);
 	word_layer_set_letter(s_example3_word, 2, 'g', LetterStatusNeutral, true);
-	word_layer_set_letter(s_example3_word, 3, 'u', LetterStatusNeutral, true);
-	word_layer_set_letter(s_example3_word, 4, 'e', LetterStatusNotPresent, true);
+	word_layer_set_letter(s_example3_word, 3, 'u', LetterStatusNotPresent, true);
+	word_layer_set_letter(s_example3_word, 4, 'e', LetterStatusNeutral, true);
 	scroll_layer_add_child(s_scroll_layer, (Layer *)s_example3_word);
 
 	s_example3_label = text_layer_create(GRect(5, 940, 134, 180));
