@@ -1,7 +1,7 @@
 {
   "name": "pebble-wordle",
   "author": "Katharine Berry",
-  "version": "0.8.0",
+  "version": "1.1.0",
   "keywords": [
     "pebble-app"
   ],
@@ -34,6 +34,12 @@
           "type": "raw",
           "name": "SOLUTION_WORDS",
           "file": "solutions.dat"
+        },
+        {
+          "type": "bitmap",
+          "name": "MENU_ICON",
+          "menuIcon": true,
+          "file": "menu_icon.png"
         }
       ]
     }

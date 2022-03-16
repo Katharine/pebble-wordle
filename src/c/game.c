@@ -82,7 +82,7 @@ static void prv_init() {
 
 static void prv_window_load(Window *window) {
 	for (int i = 0; i < GUESS_LIMIT; ++i) {
-		s_guess_layers[i] = word_layer_create(GPoint(6, 6 + i * (WORD_LAYER_HEIGHT + 1)));
+		s_guess_layers[i] = word_layer_create(GPoint(7, 6 + i * (WORD_LAYER_HEIGHT + 1)));
 		layer_add_child(window_get_root_layer(window), s_guess_layers[i]);
 	}
 	prv_restore_state();
