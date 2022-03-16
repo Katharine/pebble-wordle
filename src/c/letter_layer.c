@@ -19,11 +19,18 @@ typedef struct {
 	bool confirmed;
 } LetterLayerData;
 
-GColor layer_colors[LetterStatusCount] = {
+static GColor s_layer_colors[LetterStatusCount] = {
 	GColorWhite,
-	GColorLightGray,
-	GColorYellow,
-	GColorGreen,
+	PBL_IF_COLOR_ELSE(GColorLightGray, GColorDarkGray),
+	PBL_IF_COLOR_ELSE(GColorYellow, GColorWhite),
+	PBL_IF_COLOR_ELSE(GColorGreen, GColorBlack),
+};
+
+static GColor s_text_colors[LetterStatusCount] = {
+	GColorBlack,
+	GColorBlack,
+	GColorBlack,
+	PBL_IF_COLOR_ELSE(GColorBlack, GColorWhite),
 };
 
 static void prv_update_proc(Layer *layer, GContext *ctx);
@@ -91,18 +98,28 @@ static void prv_update_proc(Layer *layer, GContext *ctx) {
 	LetterLayerData *data = layer_get_data(layer);
 
 	GRect bounds = layer_get_bounds(layer);
-	if (data->confirmed) {
-		graphics_context_set_fill_color(ctx, layer_colors[data->status]);
-		graphics_fill_rect(ctx, GRect(1, 1, bounds.size.w - 2, bounds.size.h - 2), 0, GCornerNone);
-	} else {
-		prv_fill_rect(layer, ctx, layer_colors[data->status]);
-	}
 	graphics_context_set_stroke_color(ctx, GColorBlack);
+	if (data->confirmed) {
+		graphics_context_set_fill_color(ctx, s_layer_colors[data->status]);
+		#ifdef PBL_COLOR
+		graphics_fill_rect(ctx, GRect(1, 1, bounds.size.w - 2, bounds.size.h - 2), 0, GCornerNone);
+		#else
+		if (data->status == LetterStatusWrongPosition) {
+			graphics_draw_rect(ctx, GRect(1, 1, bounds.size.w - 2, bounds.size.h - 2));
+		} else {
+			graphics_fill_rect(ctx, GRect(1, 1, bounds.size.w - 2, bounds.size.h - 2), 0, GCornerNone);
+		}
+		#endif
+	} else {
+		#ifdef PBL_COLOR
+		prv_fill_rect(layer, ctx, s_layer_colors[data->status]);
+		#endif
+	}
 	graphics_draw_rect(ctx, GRect(0, 0, bounds.size.w, bounds.size.h));
 
 	if (data->letter != 0) {
 		char letter_string[2] = {prv_to_upper(data->letter), 0};
-		graphics_context_set_text_color(ctx, GColorBlack);
+		graphics_context_set_text_color(ctx, PBL_IF_COLOR_ELSE(true, data->confirmed) ? s_text_colors[data->status] : GColorBlack);
 		graphics_draw_text(ctx, letter_string, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(0, -(LETTER_LAYER_SIZE - bounds.size.h)/2 - 1, bounds.size.w, bounds.size.h), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 	}
 }
