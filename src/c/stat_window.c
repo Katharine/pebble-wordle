@@ -98,8 +98,9 @@ static void prv_window_load(Window *window) {
 	content_indicator_configure_direction(s_content_indicator, ContentIndicatorDirectionDown, &down_config);
 
 	bool has_completed_game = (game_get_status() == GameStatusWon || game_get_status() == GameStatusLost);
+	bool show_qr_code = PBL_PLATFORM_TYPE_CURRENT != PlatformTypeAplite && has_completed_game;
 
-	scroll_layer_set_content_size(s_scroll_layer, GSize(144, 168 * (has_completed_game ? 3 : 2)));
+	scroll_layer_set_content_size(s_scroll_layer, GSize(144, 168 * (show_qr_code ? 3 : 2)));
 
 	s_played_number = prv_create_value(s_scroll_layer, GRect(0, 5, 72, 44));
 	s_played_label = prv_create_label(s_scroll_layer, GRect(0, 39, 72, 25), "Played");
@@ -125,7 +126,7 @@ static void prv_window_load(Window *window) {
 	scroll_layer_add_child(s_scroll_layer, s_distribution_layer);
 	s_distribution_label = prv_create_label(s_scroll_layer, GRect(0, 177, 144, 25), "Distribution");
 
-	if (has_completed_game) {
+	if (show_qr_code) {
 		s_share_layer = share_layer_create(GRect(0, 354, 144, 125));
 		s_share_label = prv_create_label(s_scroll_layer, GRect(0, 479, 144, 25), "Scan to share score");
 		LetterStatus statuses[GUESS_LIMIT][WORD_LENGTH];

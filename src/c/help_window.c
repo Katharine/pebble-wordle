@@ -127,4 +127,3 @@ static void prv_window_unload(Window *window) {
 	text_layer_destroy(s_explanation_layer);
 	scroll_layer_destroy(s_scroll_layer);
 }
-

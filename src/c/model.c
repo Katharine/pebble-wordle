@@ -119,13 +119,9 @@ int wordle_number() {
 	time_t epoch_unixtime = 1624060800;
 
 	time_t now = time(NULL);
-	APP_LOG(APP_LOG_LEVEL_INFO, "now: %d", now);
 	time_t tz_offset = prv_timezone_offset();
-	APP_LOG(APP_LOG_LEVEL_INFO, "tz_offset: %d", tz_offset);
 	now += tz_offset;
-	APP_LOG(APP_LOG_LEVEL_INFO, "local now: %d", now);
 	int days = (int)(now - epoch_unixtime) / 86400;
-	APP_LOG(APP_LOG_LEVEL_INFO, "wordle: %d", days);
 	return days;
 }
 

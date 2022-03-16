@@ -112,6 +112,7 @@ static void prv_handle_select(ClickRecognizerRef recognizer, void *ctx) {
       break;
     case 2:
       help_window_push();
+      break;
   }
 }
 
