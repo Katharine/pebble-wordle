@@ -16,7 +16,7 @@ config:
 log:
 	pebble logs --emulator $(PEBBLE_EMULATOR)
 
-travis_build: init_overlays
+travis_build: 
 	yes | sdk/bin/pebble build
 
 install:
