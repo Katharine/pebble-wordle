@@ -79,10 +79,12 @@ static void fillRectangle(int left, int top, int width, int height, uint8_t qrco
 
 static void drawCodewords(const uint8_t data[], int dataLen, uint8_t qrcode[]);
 static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], enum qrcodegen_Mask mask);
+#ifndef PBL_PLATFORM_APLITE
 static long getPenaltyScore(const uint8_t qrcode[]);
 static int finderPenaltyCountPatterns(const int runHistory[7], int qrsize);
 static int finderPenaltyTerminateAndCount(bool currentRunColor, int currentRunLength, int runHistory[7], int qrsize);
 static void finderPenaltyAddHistory(int currentRunLength, int runHistory[7], int qrsize);
+#endif
 
 testable bool getModuleBounded(const uint8_t qrcode[], int x, int y);
 testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isDark);
@@ -123,12 +125,13 @@ testable const int8_t NUM_ERROR_CORRECTION_BLOCKS[4][3] = {
 	{-1, 1, 1},  // High
 };
 
+#ifndef PBL_PLATFORM_APLITE
 // For automatic mask pattern selection.
 static const int PENALTY_N1 =  3;
 static const int PENALTY_N2 =  3;
 static const int PENALTY_N3 = 40;
 static const int PENALTY_N4 = 10;
-
+#endif
 
 
 /*---- High-level QR Code encoding functions ----*/
@@ -644,7 +647,7 @@ static void applyMask(const uint8_t functionModules[], uint8_t qrcode[], enum qr
 	}
 }
 
-
+#ifndef PBL_PLATFORM_APLITE
 // Calculates and returns the penalty score based on state of the given QR Code's current modules.
 // This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
 static long getPenaltyScore(const uint8_t qrcode[]) {
@@ -723,8 +726,9 @@ static long getPenaltyScore(const uint8_t qrcode[]) {
 	assert(0 <= result && result <= 2568888L);  // Non-tight upper bound based on default values of PENALTY_N1, ..., N4
 	return result;
 }
+#endif
 
-
+#ifndef PBL_PLATFORM_APLITE
 // Can only be called immediately after a light run is added, and
 // returns either 0, 1, or 2. A helper function for getPenaltyScore().
 static int finderPenaltyCountPatterns(const int runHistory[7], int qrsize) {
@@ -736,8 +740,9 @@ static int finderPenaltyCountPatterns(const int runHistory[7], int qrsize) {
 	return (core && runHistory[0] >= n * 4 && runHistory[6] >= n ? 1 : 0)
 	     + (core && runHistory[6] >= n * 4 && runHistory[0] >= n ? 1 : 0);
 }
+#endif
 
-
+#ifndef PBL_PLATFORM_APLITE
 // Must be called at the end of a line (row or column) of modules. A helper function for getPenaltyScore().
 static int finderPenaltyTerminateAndCount(bool currentRunColor, int currentRunLength, int runHistory[7], int qrsize) {
 	if (currentRunColor) {  // Terminate dark run
@@ -748,8 +753,9 @@ static int finderPenaltyTerminateAndCount(bool currentRunColor, int currentRunLe
 	finderPenaltyAddHistory(currentRunLength, runHistory, qrsize);
 	return finderPenaltyCountPatterns(runHistory, qrsize);
 }
+#endif
 
-
+#ifndef PBL_PLATFORM_APLITE
 // Pushes the given value to the front and drops the last value. A helper function for getPenaltyScore().
 static void finderPenaltyAddHistory(int currentRunLength, int runHistory[7], int qrsize) {
 	if (runHistory[0] == 0)
@@ -757,7 +763,7 @@ static void finderPenaltyAddHistory(int currentRunLength, int runHistory[7], int
 	memmove(&runHistory[1], &runHistory[0], 6 * sizeof(runHistory[0]));
 	runHistory[0] = currentRunLength;
 }
-
+#endif
 
 
 /*---- Basic QR Code information ----*/
