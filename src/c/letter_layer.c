@@ -37,7 +37,9 @@ static void prv_update_proc(Layer *layer, GContext *ctx);
 static char prv_to_upper(char lower);
 static void prv_handle_shrink_finished(Animation *animation, bool finished, void *context);
 static void prv_handle_sequence_finished(Animation *animation, bool finished, void *context);
+#ifdef PBL_COLOR
 static void prv_fill_rect(Layer *layer, GContext *ctx, GColor color);
+#endif
 
 LetterLayer *letter_layer_create(GPoint where) {
 	Layer *layer = layer_create_with_data(GRect(where.x, where.y, LETTER_LAYER_SIZE, LETTER_LAYER_SIZE), sizeof(LetterLayerData));
@@ -124,6 +126,7 @@ static void prv_update_proc(Layer *layer, GContext *ctx) {
 	}
 }
 
+#ifdef PBL_COLOR
 static void prv_fill_rect(Layer *layer, GContext *ctx, GColor color) {
 	GBitmap *fb_bitmap = graphics_capture_frame_buffer_format(ctx, GBitmapFormat8Bit);
 	uint8_t *fb = gbitmap_get_data(fb_bitmap);
@@ -138,6 +141,7 @@ static void prv_fill_rect(Layer *layer, GContext *ctx, GColor color) {
 	}
 	graphics_release_frame_buffer(ctx, fb_bitmap);
 }
+#endif
 
 static char prv_to_upper(char lower) {
 	return lower - ('a' - 'A');
